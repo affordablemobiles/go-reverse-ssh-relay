@@ -162,7 +162,7 @@ func handleChannels(chans <-chan ssh.NewChannel) {
 		// Sessions have out-of-band requests such as "shell", "pty-req" and "env"
 		go func(in <-chan *ssh.Request) {
 			for req := range in {
-				log.Printf("%v %s", req.Payload, req.Payload)
+				//log.Printf("%s", req.Type)
 				ok := false
 				switch req.Type {
 				case "exec":
@@ -182,9 +182,14 @@ func handleChannels(chans <-chan ssh.NewChannel) {
 
 					// teardown session
 					go func() {
-						_, err := cmd.Process.Wait()
+						state, err := cmd.Process.Wait()
 						if err != nil {
 							log.Printf("failed to exit bash (%s)", err)
+						}
+						if waitStatus, ok := state.Sys().(syscall.WaitStatus); ok {
+							exitCode := make([]byte, 4)
+							binary.LittleEndian.PutUint32(exitCode, uint32(waitStatus.ExitStatus()))
+							channel.SendRequest("exit-status", false, exitCode)
 						}
 						channel.Close()
 						log.Printf("session closed")
