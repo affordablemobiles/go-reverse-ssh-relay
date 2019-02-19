@@ -1,1 +1,5 @@
 config.yaml
+endpoint/endpoint
+endpoint/keyfile
+endpoint/keyfile.pub
+server/server
