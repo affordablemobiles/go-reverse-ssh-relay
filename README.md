@@ -1,6 +1,6 @@
 ## Reverse Connecting SSH (via concentrator) over WebSocket
 
-This is not an officially supported A1comms product; it was developed demonstration project on a one-off basis.
+This is not an officially supported A1comms product; it was developed as a demonstration project on a one-off basis.
 
 ### About
 
