@@ -15,16 +15,13 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"os/exec"
-	"sync"
 	"syscall"
 	"time"
 	"unsafe"
 
-	"github.com/kr/pty"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -150,11 +147,11 @@ func handleChannels(chans <-chan ssh.NewChannel) {
 		// allocate a terminal for this channel
 		log.Print("creating pty...")
 		// Create new pty
-		f, tty, err := pty.Open()
+		/*f, tty, err := pty.Open()
 		if err != nil {
 			log.Printf("could not start pty (%s)", err)
 			continue
-		}
+		}*/
 
 		var shell string
 		shell = os.Getenv("SHELL")
@@ -192,51 +189,51 @@ func handleChannels(chans <-chan ssh.NewChannel) {
 						channel.Close()
 						log.Printf("session closed")
 					}()
-				case "shell":
-					cmd := exec.Command(shell)
-					cmd.Env = []string{"TERM=xterm"}
-					err := PtyRun(cmd, tty)
-					if err != nil {
-						log.Printf("%s", err)
-					}
+					/*case "shell":
+						cmd := exec.Command(shell)
+						cmd.Env = []string{"TERM=xterm"}
+						err := PtyRun(cmd, tty)
+						if err != nil {
+							log.Printf("%s", err)
+						}
 
-					// Teardown session
-					var once sync.Once
-					close := func() {
-						channel.Close()
-						log.Printf("session closed")
-					}
+						// Teardown session
+						var once sync.Once
+						close := func() {
+							channel.Close()
+							log.Printf("session closed")
+						}
 
-					// Pipe session to bash and visa-versa
-					go func() {
-						io.Copy(channel, f)
-						once.Do(close)
-					}()
+						// Pipe session to bash and visa-versa
+						go func() {
+							io.Copy(channel, f)
+							once.Do(close)
+						}()
 
-					go func() {
-						io.Copy(f, channel)
-						once.Do(close)
-					}()
+						go func() {
+							io.Copy(f, channel)
+							once.Do(close)
+						}()
 
-					// We don't accept any commands (Payload),
-					// only the default shell.
-					if len(req.Payload) == 0 {
+						// We don't accept any commands (Payload),
+						// only the default shell.
+						if len(req.Payload) == 0 {
+							ok = true
+						}
+					case "pty-req":
+						// Responding 'ok' here will let the client
+						// know we have a pty ready for input
 						ok = true
-					}
-				case "pty-req":
-					// Responding 'ok' here will let the client
-					// know we have a pty ready for input
-					ok = true
-					// Parse body...
-					termLen := req.Payload[3]
-					termEnv := string(req.Payload[4 : termLen+4])
-					w, h := parseDims(req.Payload[termLen+4:])
-					SetWinsize(f.Fd(), w, h)
-					log.Printf("pty-req '%s'", termEnv)
-				case "window-change":
-					w, h := parseDims(req.Payload)
-					SetWinsize(f.Fd(), w, h)
-					continue //no response
+						// Parse body...
+						termLen := req.Payload[3]
+						termEnv := string(req.Payload[4 : termLen+4])
+						w, h := parseDims(req.Payload[termLen+4:])
+						SetWinsize(f.Fd(), w, h)
+						log.Printf("pty-req '%s'", termEnv)
+					case "window-change":
+						w, h := parseDims(req.Payload)
+						SetWinsize(f.Fd(), w, h)
+						continue //no response*/
 				}
 
 				if !ok {
