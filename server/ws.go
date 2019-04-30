@@ -140,10 +140,19 @@ func (c *ClientWSconn) IdentityHandshake() error {
 	return nil
 }
 
-func (c *ClientWSconn) AllocatePort() int {
+func (c *ClientWSconn) AllocatePort() (port int) {
 	clientMutex.Lock()
+	defer func() {
+		clientMAP[port] = c
 
-	var port int
+		clientMutex.Unlock()
+	}()
+
+	lookupString := fmt.Sprintf("%s:%s:%s", c.metadata.Project, c.metadata.Service, c.metadata.Version)
+	if sPort, ok := globalConfig.StaticPortMap[lookupString]; ok {
+		port = sPort
+		return
+	}
 
 	for i := globalConfig.LocalListenStart; i < globalConfig.LocalListenEnd; i++ {
 		if _, ok := clientMAP[i]; !ok {
@@ -156,11 +165,7 @@ func (c *ClientWSconn) AllocatePort() int {
 		panic(fmt.Errorf("Unable to Allocate Port"))
 	}
 
-	clientMAP[port] = c
-
-	clientMutex.Unlock()
-
-	return port
+	return
 }
 
 func (c *ClientWSconn) PostHandshakeInit() error {

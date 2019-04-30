@@ -45,6 +45,15 @@ func startSSHInternal() {
 		return
 	}
 
+	done := make(chan bool)
+	go func() {
+		err1, err2, _ := sess.Wait()
+
+		log.Printf("SSH Server: Muxado exited with errors: %s ... %s", err1, err2)
+
+		done <- true
+	}()
+
 	authorizedKeysMap := map[string]bool{}
 	for _, kv := range globalConfig.allowedClients {
 		pubKey, _, _, _, err := ssh.ParseAuthorizedKey([]byte(kv))
@@ -78,6 +87,15 @@ func startSSHInternal() {
 	sshConfig.AddHostKey(private)
 
 	for {
+		select {
+		case _ = <-done:
+			// Looks like our connection back to the concentrator dropped,
+			// return here, so we'll retry a connection...
+			return
+		default:
+			// Muxado connection is still active, carry on...
+		}
+
 		conn, err := sess.Accept()
 		if err != nil {
 			log.Printf("SSH Server: failed to accept incoming connection (%s)", err)

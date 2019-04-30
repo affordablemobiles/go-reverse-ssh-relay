@@ -1,4 +1,5 @@
 remoteEndpoint: "wss://ssh-relay.example.com:8443/api/client_ws"
+healthcheckListenPort: 7786
 serverKey: "< generate keyfile with ssh-keygen && (cat keyfile | base64) && remove newlines >"
 allowedClientKeys:
   - "ssh-rsa pubkeydata root@test.com"

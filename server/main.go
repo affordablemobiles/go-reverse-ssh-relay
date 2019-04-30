@@ -4,15 +4,19 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/jessevdk/go-flags"
 	"gopkg.in/yaml.v2"
 )
 
 var globalConfig struct {
-	ListenPort       int `yaml:"listenPort"`
-	LocalListenStart int `yaml:"localListenStart"`
-	LocalListenEnd   int `yaml:"localListenEnd"`
+	ListenPort       int            `yaml:"listenPort"`
+	ListenPortStatus int            `yaml:"listenPortStatus"`
+	LocalListenStart int            `yaml:"localListenStart"`
+	LocalListenEnd   int            `yaml:"localListenEnd"`
+	StaticPortMap    map[string]int `yaml:"staticPortMap"`
 }
 
 var opts struct {
@@ -43,7 +47,26 @@ func main() {
 		log.Fatalf("Error while processing config file.")
 	}
 
+	// Set up channel on which to send signal notifications.
+	// We must use a buffered channel or risk missing the signal
+	// if we're not ready to receive when the signal is sent.
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP)
+
+	// Block until a signal is received.
+	go func() {
+		for s := range c {
+			log.Printf("Got signal: %#v", s)
+
+			err := processConfig()
+			if err != nil {
+				log.Fatalf("Error while processing config file.")
+			}
+		}
+	}()
+
 	go startWebSocket()
+	go startWebStatus()
 
 	done := make(chan bool)
 	<-done

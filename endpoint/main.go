@@ -17,6 +17,7 @@ var globalConfig struct {
 	RemoteEndpoint        string   `yaml:"remoteEndpoint"`
 	ServerKeyEncoded      string   `yaml:"serverKey"`
 	AllowedClientsEncoded []string `yaml:"allowedClientKeys"`
+	HealthcheckListenPort int      `yaml:"healthcheckListenPort"`
 
 	serverKey      string
 	allowedClients []string
@@ -27,6 +28,8 @@ var opts struct {
 }
 
 var logger, _ = syslog.New(syslog.LOG_DAEMON, "ssh-dev-endpoint")
+
+var startTime = time.Now()
 
 func main() {
 	_, err := flags.Parse(&opts)
@@ -88,6 +91,8 @@ func main() {
 	go worker()
 
 	go startSSH()
+
+	go startwebsrv()
 
 	err = daemon.ServeSignals()
 	if err != nil {

@@ -1,3 +1,9 @@
-listenPort: 7786
+listenPort: 7789
+listenPortStatus: 7786
 localListenStart: 7800
 localListenEnd: 7899
+staticPortMap:
+  "my-great-project:default:dev-psmith":    8500
+  "my-great-project:default:dev-tsmith":    8501
+  "my-great-project:test:dev-psmith":       8600
+  "my-great-project:test:dev-tsmith":       8601
