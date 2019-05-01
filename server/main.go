@@ -33,15 +33,6 @@ func main() {
 		log.Fatalf("Specified config file doesn't exist!\n")
 	}
 
-	data, err := ioutil.ReadFile(opts.Config)
-	if err != nil {
-		log.Fatalf("Failed to read config file.")
-	}
-
-	err = yaml.Unmarshal([]byte(data), &globalConfig)
-	if err != nil {
-		log.Fatalf("Error while parsing config file.")
-	}
 	err = processConfig()
 	if err != nil {
 		log.Fatalf("Error while processing config file.")
@@ -73,6 +64,16 @@ func main() {
 }
 
 func processConfig() error {
+	data, err := ioutil.ReadFile(opts.Config)
+	if err != nil {
+		log.Fatalf("Failed to read config file.")
+	}
+
+	err = yaml.Unmarshal([]byte(data), &globalConfig)
+	if err != nil {
+		log.Fatalf("Error while parsing config file.")
+	}
+
 	if globalConfig.LocalListenStart < 1024 {
 		log.Fatalf("Start port must be higher than 1024")
 	}
