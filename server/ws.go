@@ -169,7 +169,13 @@ func (c *ClientWSconn) AllocatePort() (port int) {
 }
 
 func (c *ClientWSconn) PostHandshakeInit() error {
-	go StartMuxadoSession(c.listenPort, c, c.done)
+	go func(){
+		err := StartMuxadoSession(c.listenPort, c, c.done)
+		if err != nil {
+			log.Printf("Local Listen Error: %s", err)
+			c.CloseCleanup()
+		}
+	}()
 
 	return nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/inconshreveable/muxado"
 )
 
-func StartMuxadoSession(port int, rwc io.ReadWriteCloser, done <-chan bool) {
+func StartMuxadoSession(port int, rwc io.ReadWriteCloser, done <-chan bool) (error) {
 	mux := muxado.Client(rwc, nil)
 
 	var p tcpproxy.Proxy
@@ -31,6 +31,5 @@ func StartMuxadoSession(port int, rwc io.ReadWriteCloser, done <-chan bool) {
 		p.Close()
 	}()
 
-	err := p.Run()
-	log.Printf("%s", err)
+	return p.Run()
 }
