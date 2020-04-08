@@ -154,10 +154,18 @@ func (c *ClientWSconn) AllocatePort() (port int) {
 		return
 	}
 
+	portMap := c.GetReverseStaticPortmap()
+
 	for i := globalConfig.LocalListenStart; i < globalConfig.LocalListenEnd; i++ {
-		if _, ok := clientMAP[i]; !ok {
-			port = i
-			break
+		if _, ok := portMap[i]; !ok {
+			if _, ok := clientMAP[i]; !ok {
+				port = i
+
+				globalConfig.StaticPortMap[lookupString] = port
+				saveConfig()
+
+				break
+			}
 		}
 	}
 
@@ -168,8 +176,18 @@ func (c *ClientWSconn) AllocatePort() (port int) {
 	return
 }
 
+func (c *ClientWSconn) GetReverseStaticPortmap() map[int]string {
+	data := map[int]string{}
+
+	for k, v := range globalConfig.StaticPortMap {
+		data[v] = k
+	}
+
+	return data
+}
+
 func (c *ClientWSconn) PostHandshakeInit() error {
-	go func(){
+	go func() {
 		err := StartMuxadoSession(c.listenPort, c, c.done)
 		if err != nil {
 			log.Printf("Local Listen Error: %s", err)

@@ -87,3 +87,15 @@ func processConfig() error {
 
 	return nil
 }
+
+func saveConfig() {
+	data, err := yaml.Marshal(&globalConfig)
+	if err != nil {
+		log.Fatalf("Failed to marshal config: %s", err)
+	}
+
+	err = ioutil.WriteFile(opts.Config, data, 0644)
+	if err != nil {
+		log.Fatalf("Failed to write new config: %s", err)
+	}
+}
