@@ -4,3 +4,4 @@ endpoint/keyfile.pub
 server/build
 endpoint/build
 vendor
+/build
