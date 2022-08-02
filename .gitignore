@@ -2,6 +2,8 @@ config.yaml
 endpoint/keyfile
 endpoint/keyfile.pub
 server/build
+server/server
+endpoint/endpoint
 endpoint/build
 vendor
 /build

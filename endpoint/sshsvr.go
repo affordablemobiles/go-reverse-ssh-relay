@@ -81,7 +81,7 @@ func startSSHInternal() {
 
 	private, err := ssh.ParsePrivateKey([]byte(globalConfig.serverKey))
 	if err != nil {
-		log.Fatal("SSH Server: Failed to parse private key")
+		log.Fatalf("SSH Server: Failed to parse private key: %s", err)
 	}
 
 	sshConfig.AddHostKey(private)

@@ -7,8 +7,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/google/tcpproxy"
 	"github.com/inconshreveable/muxado"
+	"inet.af/tcpproxy"
 )
 
 func StartMuxadoSession(port int, rwc io.ReadWriteCloser, done <-chan bool) error {
